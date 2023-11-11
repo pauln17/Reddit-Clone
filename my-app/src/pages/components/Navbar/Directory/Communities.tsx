@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CreateCommunityModal from '../../Modal/CreateCommunity/CreateCommunityModal';
+import { CreateCommunityModal } from '../../Modal/CreateCommunity/CreateCommunityModal';
 import { MenuItem, Flex, Icon } from '@chakra-ui/react';
 import { GrAdd } from 'react-icons/gr';
 

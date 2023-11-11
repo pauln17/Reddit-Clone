@@ -1,18 +1,23 @@
+import { auth, firestore } from '@/src/firebase/clientApp';
 import { Button, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Box, Divider, Input, Checkbox, Stack, Flex, Icon } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { BsFillPersonFill, BsFillEyeFill } from 'react-icons/bs';
 import { HiLockClosed } from 'react-icons/hi';
-
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 type CreateCommunityModalProps = {
     open: boolean;
     handleClose: () => void;
 };
 
-const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handleClose }) => {
+export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handleClose }) => {
+    const [user] = useAuthState(auth);
     const [communityName, setCommunityName] = useState("");
     const [charsRemaining, setCharsRemaining] = useState(21);
     const [communityType, setCommunityType] = useState("public");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.value.length > 21) return;
@@ -23,7 +28,41 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
 
     const onCommunityTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCommunityType(event.target.name);
-    }
+    };
+
+    const handleCreateCommunity = async () => {
+        if (error) setError("");
+        // Validate the community name (characters)
+        const format = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~]/;
+        if (format.test(communityName) || communityName.length < 3) {
+            setError('Community names must be between 3-21 characters and can only contain letters, numbers, or underscores');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const communityDocRef = doc(firestore, 'communities', communityName);
+            const communityDoc = await getDoc(communityDocRef);
+
+            // Check if community exists in database
+            if (communityDoc.exists()) {
+                throw new Error(`Sorry, r/${communityName} is taken. Try another.`);
+            }
+
+            // Create community
+            await setDoc(communityDocRef, {
+                creatorId: user?.uid,
+                createdAt: serverTimestamp(),
+                numberOfMembers: 1,
+                privacyType: communityType,
+            });
+        } catch (error: any) {
+            console.log("handleCreateCommunity error", error);
+            setError(error.message);
+        }
+        setLoading(false);
+    };
 
     return (
         <>
@@ -59,11 +98,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
                                 size="sm"
                                 pl="23px"
                                 onChange={handleChange}
-                                fontSize="10pt"
-                            />
+                                fontSize="10pt" />
                             <Text color={charsRemaining === 0 ? "red" : "grey.500"} fontSize="9pt">
                                 {charsRemaining} characters remaining
                             </Text>
+                            <Text fontSize="9pt" pt={1} color="red">{error}</Text>
                             <Box mt={4} mb={4}>
                                 <Text fontWeight={600} fontSize={15} mb={2}>
                                     Community Type
@@ -79,7 +118,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
                                             <Text fontSize="10pt" mr={1}>
                                                 Public
                                             </Text>
-                                            <Text fontSize="8pt" color="gray.500" >
+                                            <Text fontSize="8pt" color="gray.500">
                                                 Anyone can view, post and comment to this community
                                             </Text>
                                         </Flex>
@@ -96,7 +135,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
                                             <Text fontSize="10pt" mr={1}>
                                                 Restricted
                                             </Text>
-                                            <Text fontSize="8pt" color="gray.500" >
+                                            <Text fontSize="8pt" color="gray.500">
                                                 Anyone can view this community, but only approved users can post
                                             </Text>
                                         </Flex>
@@ -112,7 +151,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
                                             <Text fontSize="10pt" mr={1}>
                                                 Private
                                             </Text>
-                                            <Text fontSize="8pt" color="gray.500" >
+                                            <Text fontSize="8pt" color="gray.500">
                                                 Only approved users can view and submit to this community
                                             </Text>
                                         </Flex>
@@ -126,11 +165,10 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open, handl
                         <Button variant="outline" height="30px" colorScheme='blue' mr={3} onClick={handleClose}>
                             Cancel
                         </Button>
-                        <Button height="30px" onClick={() => { }}>Create Community</Button>
+                        <Button height="30px" onClick={handleCreateCommunity} isLoading={loading}>Create Community</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
         </>
-    )
-}
-export default CreateCommunityModal;
+    );
+};
