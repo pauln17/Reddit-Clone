@@ -3,8 +3,9 @@ import { Button, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalClos
 import React, { useState } from 'react';
 import { BsFillPersonFill, BsFillEyeFill } from 'react-icons/bs';
 import { HiLockClosed } from 'react-icons/hi';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
+
 
 type CreateCommunityModalProps = {
     open: boolean;
@@ -42,21 +43,34 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open
         setLoading(true);
 
         try {
+            // Create community document and communitySnippet subcollection document on user
             const communityDocRef = doc(firestore, 'communities', communityName);
-            const communityDoc = await getDoc(communityDocRef);
 
-            // Check if community exists in database
-            if (communityDoc.exists()) {
-                throw new Error(`Sorry, r/${communityName} is taken. Try another.`);
-            }
+            await runTransaction(firestore, async (transaction) => {
+                // Check if community exists in database
+                const communityDoc = await transaction.get(communityDocRef)
+                if (communityDoc.exists()) {
+                    throw new Error(`Sorry, r/${communityName} is taken. Try another.`);
+                }
 
-            // Create community
-            await setDoc(communityDocRef, {
-                creatorId: user?.uid,
-                createdAt: serverTimestamp(),
-                numberOfMembers: 1,
-                privacyType: communityType,
+                // Create community
+                transaction.set(communityDocRef, {
+                    creatorId: user?.uid,
+                    createdAt: serverTimestamp(),
+                    numberOfMembers: 1,
+                    privacyType: communityType,
+                });
+
+                // Create communitySnippet on User (path: collection/document/subcollection)
+                transaction.set(
+                    doc(firestore, `users/${user?.uid}/communitySnippet`, communityName),
+                    {
+                        communityId: communityName,
+                        isModerator: true,
+                    }
+                );
             });
+
         } catch (error: any) {
             console.log("handleCreateCommunity error", error);
             setError(error.message);
