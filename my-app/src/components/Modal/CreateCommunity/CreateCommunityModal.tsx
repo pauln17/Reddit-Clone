@@ -46,6 +46,7 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open
             // Create community document and communitySnippet subcollection document on user
             const communityDocRef = doc(firestore, 'communities', communityName);
 
+            // Creates a transaction that manages the creation of a community and the user's subcollection communitySnippet
             await runTransaction(firestore, async (transaction) => {
                 // Check if community exists in database
                 const communityDoc = await transaction.get(communityDocRef)
@@ -61,9 +62,9 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open
                     privacyType: communityType,
                 });
 
-                // Create communitySnippet on User (path: collection/document/subcollection)
+                // Create communitySnippets on User (path: collection/document/subcollection)
                 transaction.set(
-                    doc(firestore, `users/${user?.uid}/communitySnippet`, communityName),
+                    doc(firestore, `users/${user?.uid}/communitySnippets`, communityName),
                     {
                         communityId: communityName,
                         isModerator: true,

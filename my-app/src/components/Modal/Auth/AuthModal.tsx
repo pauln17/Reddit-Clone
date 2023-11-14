@@ -24,7 +24,7 @@ const AuthModal: React.FC = () => {
     const handleClose = () => {
         setModalState((prev) => ({
             ...prev,
-            open: false,
+            open: false, // ...prev spreads the previous modalState but the function only updates open
         }))
     }
 
