@@ -32,21 +32,18 @@ const useCommunityData = () => {
 
     const getMySnippets = async () => {
         setLoading(true);
-
         try {
             const snippetDocs = await getDocs(
                 collection(firestore, `users/${user?.uid}/communitySnippets`)
             );
-            console.log("here is collection", snippetDocs)
 
             const snippets = snippetDocs.docs.map((doc) => ({ ...doc.data() }));
-
-            setCommunityStateValue(prev => ({
+            setCommunityStateValue((prev) => ({
                 ...prev,
                 // It is good practice to still spread the previous state of communityStateValue even if there is only one property
                 // In this case, mySnippets which is an array of type CommunitySnippet[]
                 // Basically this is saying it will only update the properties listed below out of the previous properties
-                mySnippets: snippets as CommunitySnippet[]
+                mySnippets: snippets as CommunitySnippet[],
             }));
         } catch (error: any) {
             console.log('getMySnippets error', error)
@@ -83,13 +80,14 @@ const useCommunityData = () => {
 
             // update recoil state -- communityState.mySnippets
             setCommunityStateValue(prev => ({
-                mySnippets: [...prev.mySnippets, newSnippet]
+                mySnippets: [...prev.mySnippets, newSnippet],
             }));
             setLoading(false);
         } catch (error: any) {
             console.log("joinCommunity error", error);
             setError(error.message);
         }
+        setLoading(false)
     };
 
     const leaveCommunity = async (communityId: string) => {
@@ -118,6 +116,7 @@ const useCommunityData = () => {
             console.log("leaveCommunity error", error);
             setError(error.message);
         }
+        setLoading(false)
     };
 
     useEffect(() => {
