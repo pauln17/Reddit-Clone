@@ -20,7 +20,7 @@ export interface CommunitySnippet {
 // Creates an interface called community state that expects an array called "mySnippets" that expects an array of type interface communitySnippet from above
 interface CommunityState {
     mySnippets: CommunitySnippet[],
-    // visitedCommunities
+    currentCommunity?: Community;
 }
 
 // Sets default values for the CommunityState interface
