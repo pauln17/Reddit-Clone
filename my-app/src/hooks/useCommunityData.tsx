@@ -80,6 +80,7 @@ const useCommunityData = () => {
 
             // update recoil state -- communityState.mySnippets
             setCommunityStateValue(prev => ({
+                ...prev,
                 mySnippets: [...prev.mySnippets, newSnippet],
             }));
             setLoading(false);
@@ -107,6 +108,7 @@ const useCommunityData = () => {
             await batch.commit();
 
             setCommunityStateValue(prev => ({
+                ...prev,
                 mySnippets: prev.mySnippets.filter(
                     (item) => item.communityId !== communityId
                 ),

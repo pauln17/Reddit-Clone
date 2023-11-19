@@ -44,7 +44,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                 ...prev,
                 currentCommunity: {
                     ...prev.currentCommunity,
-                    imageURL: downloadURL
+                    imageURL: downloadURL,
                 } as Community
             }))
         } catch (error) {
@@ -97,7 +97,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                 <Stack spacing={2}>
                     <Flex width="100%" p={2} fontSize="10pt" fontWeight={600}>
                         <Flex direction="column" flexGrow={1}>
-                            <Text>{communityData.numberOfMembers.toLocaleString()}</Text>
+                            <Text>{communityData?.numberOfMembers?.toLocaleString()}</Text>
                             <Text>Members</Text>
                         </Flex>
                         <Flex direction="column" flexGrow={1}>
