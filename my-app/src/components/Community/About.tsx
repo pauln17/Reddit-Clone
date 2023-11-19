@@ -2,7 +2,7 @@ import { Community, communityState } from '@/src/atoms/communitiesAtom';
 import { auth, firestore, storage } from '@/src/firebase/clientApp';
 import useSelectFile from '@/src/hooks/useSelectFile';
 import { Box, Button, Divider, Flex, Icon, Image, Spinner, Stack, Text } from '@chakra-ui/react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { deleteField, doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadString } from 'firebase/storage';
 import moment from "moment";
 import Link from "next/link";
@@ -46,11 +46,10 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                     ...prev.currentCommunity,
                     imageURL: downloadURL,
                 } as Community
-            }))
+            }));
         } catch (error) {
             console.log("onUpdateImage error", error);
         }
-        setSelectedFile("");
         setImageLoading(false);
     };
 
@@ -62,16 +61,23 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                 const imageRef = ref(storage, `communities/${communityData.id}/image`);
                 await deleteObject(imageRef);
             }
+
+            // update firestore database (remove imageURL)
+            await updateDoc(doc(firestore, "communities", communityData.id), {
+                imageURL: deleteField()
+            });
+
             // update recoil atom state
             setCommunityStateValue((prev) => ({
                 ...prev,
-                currentCommunity: undefined
-            }))
-
+                currentCommunity: {
+                    ...prev.currentCommunity,
+                    imageURL: undefined,
+                } as Community
+            }));
         } catch (error: any) {
             console.log("onDeleteImage error", error)
         }
-        setSelectedFile("");
         setImageLoading(false);
     }
 
@@ -152,7 +158,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                                             Delete
                                         </Text>
                                     </Stack>
-                                    {selectedFile !== "Delete" ?
+                                    {selectedFile !== "Delete" ? (
                                         communityData.imageURL || selectedFile ? (
                                             <Image objectFit="cover" src={selectedFile || communityData.imageURL} borderRadius="full" boxSize="30px" alt="Community Image" />
                                         ) : (
@@ -161,15 +167,15 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                                                 fontSize={30}
                                                 color="brand.100"
                                             />
-                                        ) : (
-                                            <Icon
-                                                as={FaReddit}
-                                                fontSize={30}
-                                                color="brand.100"
-                                            />
-                                        )}
+                                        )) : (
+                                        <Icon
+                                            as={FaReddit}
+                                            fontSize={30}
+                                            color="brand.100"
+                                        />
+                                    )}
                                 </Flex>
-                                {selectedFile &&
+                                {(selectedFile) &&
                                     (imageLoading ? (
                                         <Spinner />
                                     ) : (
