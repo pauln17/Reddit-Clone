@@ -16,17 +16,24 @@ export type Post = {
     createdAt: Timestamp;
 }
 
-// Determines the state of post (either in the single post itself, or viewing community posts)
+export type PostVote = {
+    id: string;
+    postId: string;
+    communityId: string;
+    voteValue: number;
+}
+
 interface PostState {
-    selectedPost: Post | null;
+    selectedPost: Post | null; // The current selected post
     posts: Post[] // All posts of a community
-    // postVotes
+    postVotes: PostVote[] // An array of vote objects
 }
 
 // Default values for PostState
 const defaultPostState: PostState = {
     selectedPost: null,
     posts: [],
+    postVotes: [],
 }
 
 export const postState = atom<PostState>({

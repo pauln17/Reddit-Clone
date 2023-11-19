@@ -152,7 +152,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                                             Delete
                                         </Text>
                                     </Stack>
-                                    {selectedFile !== "Delete" ? (
+                                    {selectedFile !== "Delete" ?
                                         communityData.imageURL || selectedFile ? (
                                             <Image objectFit="cover" src={selectedFile || communityData.imageURL} borderRadius="full" boxSize="30px" alt="Community Image" />
                                         ) : (
@@ -161,14 +161,13 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                                                 fontSize={30}
                                                 color="brand.100"
                                             />
-                                        )
-                                    ) : (
-                                        <Icon
-                                            as={FaReddit}
-                                            fontSize={30}
-                                            color="brand.100"
-                                        />
-                                    )}
+                                        ) : (
+                                            <Icon
+                                                as={FaReddit}
+                                                fontSize={30}
+                                                color="brand.100"
+                                            />
+                                        )}
                                 </Flex>
                                 {selectedFile &&
                                     (imageLoading ? (

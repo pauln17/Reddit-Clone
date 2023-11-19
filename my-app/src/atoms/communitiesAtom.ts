@@ -17,7 +17,7 @@ export interface CommunitySnippet {
     imageURL?: string;
 }
 
-// Creates an interface called community state that expects an array called "mySnippets" that expects an array of type interface communitySnippet from above
+// Creates an interface called CommunityState that stores the user's communitySnippets subcollection and the currentCommunity they are accessing on a page.
 interface CommunityState {
     mySnippets: CommunitySnippet[],
     currentCommunity?: Community;

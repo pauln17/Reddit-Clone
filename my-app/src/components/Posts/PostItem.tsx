@@ -19,7 +19,7 @@ type PostItemProps = {
     post: Post;
     userIsCreator: boolean;
     userVoteValue?: number;
-    onVote: () => {};
+    onVote: (post: Post, vote: number, communityId: string) => void;
     onDeletePost: (post: Post) => Promise<boolean>;
     onSelectPost: () => void; // Async functions do not need to return something, however onSelectPost is not, thus we return void
 };
@@ -70,15 +70,20 @@ const PostItem: React.FC<PostItemProps> = ({
                     as={userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowUpCircleOutline}
                     color={userVoteValue === 1 ? "brand.100" : "gray.400"}
                     fontSize={22}
-                    onClick={onVote}
+                    onClick={() => onVote(post, 1, post.communityId)}
                     cursor="pointer"
+                    _hover={{ color: "brand.100" }}
                 />
+                <Text fontSize="9pt" fontWeight={600}>
+                    {post.voteStatus}
+                </Text>
                 <Icon
                     as={userVoteValue === -1 ? IoArrowDownCircleSharp : IoArrowDownCircleOutline}
                     color={userVoteValue === -1 ? "#4379ff" : "gray.400"}
                     fontSize={22}
-                    onClick={onVote}
+                    onClick={() => onVote(post, -1, post.communityId)}
                     cursor="pointer"
+                    _hover={{ color: "#4379ff" }}
                 />
             </Flex>
             <Flex direction="column" width="100%">
