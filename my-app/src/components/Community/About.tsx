@@ -15,9 +15,10 @@ import { useRecoilState } from 'recoil';
 
 type AboutProps = {
     communityData: Community;
+    pt?: number | string;
 };
 
-const About: React.FC<AboutProps> = ({ communityData }) => {
+const About: React.FC<AboutProps> = ({ communityData, pt }) => {
     const [user] = useAuthState(auth);
     const selectedFileRef = useRef<HTMLInputElement>(null);
     const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
@@ -82,7 +83,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
     }
 
     return (
-        <Box position="sticky" top="14px">
+        <Box pt={pt} position="sticky" top="14px">
             <Flex
                 justify="space-between"
                 align="center"
@@ -103,7 +104,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
                 <Stack spacing={2}>
                     <Flex width="100%" p={2} fontSize="10pt" fontWeight={600}>
                         <Flex direction="column" flexGrow={1}>
-                            <Text>{communityData?.numberOfMembers?.toLocaleString()}</Text>
+                            <Text>{communityData.numberOfMembers.toLocaleString()}</Text>
                             <Text>Members</Text>
                         </Flex>
                         <Flex direction="column" flexGrow={1}>

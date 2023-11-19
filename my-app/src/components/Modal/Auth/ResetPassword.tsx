@@ -23,6 +23,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ }) => {
         await sendPasswordResetEmail(email);
         setSuccess(true);
     };
+    
     return (
         <Flex direction="column" alignItems="center" width="100%">
             <Icon as={BsReddit} color="brand.100" fontSize={40} mb={2} />
