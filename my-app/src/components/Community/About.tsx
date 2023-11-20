@@ -1,5 +1,6 @@
 import { Community, communityState } from '@/src/atoms/communitiesAtom';
 import { auth, firestore, storage } from '@/src/firebase/clientApp';
+import useCommunityData from '@/src/hooks/useCommunityData';
 import useSelectFile from '@/src/hooks/useSelectFile';
 import { Box, Button, Divider, Flex, Icon, Image, Spinner, Stack, Text } from '@chakra-ui/react';
 import { deleteField, doc, updateDoc } from 'firebase/firestore';
@@ -23,7 +24,7 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
     const selectedFileRef = useRef<HTMLInputElement>(null);
     const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
     const [imageLoading, setImageLoading] = useState(false);
-    const [communityStateValue, setCommunityStateValue] = useRecoilState(communityState);
+    const { communityStateValue, setCommunityStateValue } = useCommunityData();
 
     const onUpdateImage = async () => {
         if (!selectedFile) return;
@@ -104,7 +105,7 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 <Stack spacing={2}>
                     <Flex width="100%" p={2} fontSize="10pt" fontWeight={600}>
                         <Flex direction="column" flexGrow={1}>
-                            <Text>{communityData.numberOfMembers.toLocaleString()}</Text>
+                            <Text>{communityStateValue.currentCommunity?.numberOfMembers.toLocaleString()}</Text>
                             <Text>Members</Text>
                         </Flex>
                         <Flex direction="column" flexGrow={1}>

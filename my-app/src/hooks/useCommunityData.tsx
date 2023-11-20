@@ -84,6 +84,10 @@ const useCommunityData = () => {
             setCommunityStateValue(prev => ({
                 ...prev,
                 mySnippets: [...prev.mySnippets, newSnippet],
+                currentCommunity: {
+                    ...prev.currentCommunity,
+                    numberOfMembers: prev.currentCommunity?.numberOfMembers! + 1
+                } as Community
             }));
             setLoading(false);
         } catch (error: any) {
@@ -114,6 +118,10 @@ const useCommunityData = () => {
                 mySnippets: prev.mySnippets.filter(
                     (item) => item.communityId !== communityId
                 ),
+                currentCommunity: {
+                    ...prev.currentCommunity,
+                    numberOfMembers: prev.currentCommunity?.numberOfMembers! - 1
+                } as Community
             }));
             setLoading(false);
         } catch (error: any) {
@@ -159,6 +167,7 @@ const useCommunityData = () => {
     return {
         // data and functions
         communityStateValue,
+        setCommunityStateValue,
         onJoinOrLeaveCommunity,
         loading,
     }

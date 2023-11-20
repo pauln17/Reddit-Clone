@@ -73,7 +73,7 @@ const Comments: React.FC<CommentsProps> = ({
                     ...prev.selectedPost,
                     numberOfComments: prev.selectedPost?.numberOfComments! + 1
                 } as Post
-            }))
+            }));
         } catch (error) {
             console.log("onCreateComment error", error)
         }
