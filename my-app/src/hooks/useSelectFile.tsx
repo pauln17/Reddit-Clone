@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 const useSelectFile = () => {
     const [selectedFile, setSelectedFile] = useState<string>();
-
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
     const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
         // built in JS API allowing users to read files asynchronously
         const reader = new FileReader();
@@ -23,10 +24,21 @@ const useSelectFile = () => {
         }
     };
 
+    const clearFileInput = () => {
+        // Clear the file input value
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        // Clear the selectedFile state
+        setSelectedFile(undefined);
+    };
+
     return {
         selectedFile,
         setSelectedFile,
         onSelectFile,
+        clearFileInput,
+        fileInputRef,
     }
 }
 export default useSelectFile;

@@ -58,6 +58,12 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     } as Community
                 }));
             })
+
+            setSelectedFile(undefined);
+            if (selectedFileRef.current) {
+                selectedFileRef.current.value = '';
+            }
+
         } catch (error) {
             console.log("onUpdateImage error", error);
         }
@@ -92,6 +98,12 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     } as Community
                 }));
             })
+
+            setSelectedFile(undefined);
+            if (selectedFileRef.current) {
+                selectedFileRef.current.value = '';
+            }
+
         } catch (error: any) {
             console.log("onDeleteImage error", error)
         }
