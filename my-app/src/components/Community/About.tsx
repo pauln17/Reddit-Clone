@@ -7,7 +7,8 @@ import { deleteField, doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadString } from 'firebase/storage';
 import moment from "moment";
 import Link from "next/link";
-import React, { useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { FaReddit } from 'react-icons/fa';
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
@@ -24,7 +25,7 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
     const selectedFileRef = useRef<HTMLInputElement>(null);
     const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
     const [imageLoading, setImageLoading] = useState(false);
-    const { communityStateValue, setCommunityStateValue } = useCommunityData();
+    const { communityStateValue, setCommunityStateValue, getMySnippets, getCommunityData } = useCommunityData();
 
     const onUpdateImage = async () => {
         if (!selectedFile) return;
@@ -41,6 +42,13 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
             await updateDoc(doc(firestore, "communities", communityData.id), {
                 imageURL: downloadURL
             })
+
+            await updateDoc(doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id), {
+                imageURL: downloadURL
+            });
+
+            // update mySnippets in communityStateValue
+            getMySnippets();
 
             setCommunityStateValue(prev => ({
                 ...prev,
@@ -69,6 +77,14 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 imageURL: deleteField()
             });
 
+            // delete imageURL from communitySnippets
+            await updateDoc(doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id), {
+                imageURL: deleteField()
+            });
+
+            // update mySnippets in communityStateValue
+            getMySnippets();
+
             // update recoil atom state
             setCommunityStateValue((prev) => ({
                 ...prev,
@@ -82,6 +98,13 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
         }
         setImageLoading(false);
     }
+
+    useEffect(() => {
+        if (communityStateValue.currentCommunity?.id != communityData.id) {
+            getCommunityData(communityData.id)
+            setSelectedFile(undefined);
+        }
+    }, [communityData])
 
     return (
         <Box pt={pt} position="sticky" top="14px">
@@ -161,8 +184,8 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                                         </Text>
                                     </Stack>
                                     {selectedFile !== "Delete" ? (
-                                        communityData.imageURL || selectedFile ? (
-                                            <Image objectFit="cover" src={selectedFile || communityData.imageURL} borderRadius="full" boxSize="30px" alt="Community Image" />
+                                        (communityStateValue.currentCommunity?.imageURL || selectedFile) ? (
+                                            <Image objectFit="cover" src={selectedFile ? selectedFile : communityStateValue.currentCommunity?.imageURL} borderRadius="full" boxSize="30px" alt="Community Image" />
                                         ) : (
                                             <Icon
                                                 as={FaReddit}

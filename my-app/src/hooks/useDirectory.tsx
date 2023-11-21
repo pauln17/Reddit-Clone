@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue, useRecoilState } from 'recoil';
 import { DirectoryMenuItem, directoryMenuState } from '../atoms/directoryMenuAtom';
 import { useRouter } from 'next/router';
 import { communityState } from '../atoms/communitiesAtom';
 import { FaReddit } from 'react-icons/fa';
+import useSelectFile from './useSelectFile';
 
 
 const useDirectory = () => {
@@ -16,7 +17,9 @@ const useDirectory = () => {
             ...prev,
             selectedMenuItem: menuItem
         }));
+
         router.push(menuItem.link);
+
         if (directoryState.isOpen) {
             toggleMenuOpen();
         }
@@ -42,7 +45,7 @@ const useDirectory = () => {
                     icon: FaReddit,
                     iconColor: "brand.100"
                 }
-            }))
+            }));
         }
     }, [communityStateValue.currentCommunity])
 

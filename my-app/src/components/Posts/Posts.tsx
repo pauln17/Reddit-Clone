@@ -48,11 +48,10 @@ const Posts: React.FC<PostsProps> = ({ communityData }) => {
         } catch (error: any) {
             console.log("getPosts error", error.message);
         }
-
         setLoading(false);
     };
 
-    useEffect(() => {
+    useEffect(() => { 
         getPosts();
     }, [communityData])
 
