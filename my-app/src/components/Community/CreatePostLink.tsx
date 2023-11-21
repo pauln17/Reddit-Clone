@@ -1,5 +1,6 @@
 import { authModalState } from "@/src/atoms/authModalAtom";
 import { auth } from "@/src/firebase/clientApp";
+import useDirectory from "@/src/hooks/useDirectory";
 import { Flex, Icon, Input } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import React from "react";
@@ -13,14 +14,22 @@ const CreatePostLink: React.FC = () => {
     const router = useRouter();
     const setAuthModalState = useSetRecoilState(authModalState);
     const [user] = useAuthState(auth);
-
+    const { toggleMenuOpen } = useDirectory();
+    
     const onClick = () => {
         if (!user) {
             setAuthModalState({ open: true, view: "login" });
             return;
         }
         const { communityId } = router.query; // Queries the URL for "CommunityId" (dynamic path folder name)
-        router.push(`/r/${communityId}/submit`); // Sets the URL to this path
+
+        if (communityId) {
+            router.push(`/r/${communityId}/submit`); // Sets the URL to this path
+            return;
+        }
+
+        // open our directory menu
+        toggleMenuOpen();
     };
 
     return (
