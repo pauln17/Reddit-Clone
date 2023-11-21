@@ -78,7 +78,6 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
 
             // check for selectedFile
             if (selectedFile) {
-
                 // creates a posts folder in storage if not exists
                 // else creates a reference to posts/postId/image in the bucket
                 const imageRef = ref(storage, `posts/${postDocRef.id}/image`)

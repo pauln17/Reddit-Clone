@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { Post, PostVote, postState } from '../atoms/postsAtom';
-import { deleteObject, ref } from 'firebase/storage';
-import { auth, firestore, storage } from '../firebase/clientApp';
 import { collection, deleteDoc, doc, getDocs, query, where, writeBatch } from 'firebase/firestore';
+import { deleteObject, ref } from 'firebase/storage';
+import { useRouter } from 'next/router';
+import React, { useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { communityState } from '../atoms/communitiesAtom';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { authModalState } from '../atoms/authModalAtom';
-import { Preahvihear } from 'next/font/google';
-import router, { Router, useRouter } from 'next/router';
+import { communityState } from '../atoms/communitiesAtom';
+import { Post, PostVote, postState } from '../atoms/postsAtom';
+import { auth, firestore, storage } from '../firebase/clientApp';
 
 const usePosts = () => {
     const [user] = useAuthState(auth);
