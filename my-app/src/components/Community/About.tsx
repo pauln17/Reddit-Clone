@@ -3,7 +3,7 @@ import { auth, firestore, storage } from '@/src/firebase/clientApp';
 import useCommunityData from '@/src/hooks/useCommunityData';
 import useSelectFile from '@/src/hooks/useSelectFile';
 import { Box, Button, Divider, Flex, Icon, Image, Spinner, Stack, Text } from '@chakra-ui/react';
-import { deleteField, doc, updateDoc } from 'firebase/firestore';
+import { deleteField, doc, runTransaction, updateDoc } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadString } from 'firebase/storage';
 import moment from "moment";
 import Link from "next/link";
@@ -36,27 +36,28 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
 
         setImageLoading(true);
         try {
-            const imageRef = ref(storage, `communities/${communityData.id}/image`)
-            await uploadString(imageRef, selectedFile, "data_url");
-            const downloadURL = await getDownloadURL(imageRef);
-            await updateDoc(doc(firestore, "communities", communityData.id), {
-                imageURL: downloadURL
+            await runTransaction(firestore, async (transaction) => {
+                const imageRef = ref(storage, `communities/${communityData.id}/image`)
+                await uploadString(imageRef, selectedFile, "data_url");
+                const downloadURL = await getDownloadURL(imageRef);
+
+                const communityDocRef = doc(firestore, "communities", communityData.id);
+                const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+
+                transaction.update(communityDocRef, { imageURL: downloadURL });
+                transaction.update(userDocRef, { imageURL: downloadURL });
+
+                // update mySnippets in communityStateValue
+                getMySnippets();
+
+                setCommunityStateValue(prev => ({
+                    ...prev,
+                    currentCommunity: {
+                        ...prev.currentCommunity,
+                        imageURL: downloadURL,
+                    } as Community
+                }));
             })
-
-            await updateDoc(doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id), {
-                imageURL: downloadURL
-            });
-
-            // update mySnippets in communityStateValue
-            getMySnippets();
-
-            setCommunityStateValue(prev => ({
-                ...prev,
-                currentCommunity: {
-                    ...prev.currentCommunity,
-                    imageURL: downloadURL,
-                } as Community
-            }));
         } catch (error) {
             console.log("onUpdateImage error", error);
         }
@@ -66,33 +67,31 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
     const onDeleteImage = async () => {
         setImageLoading(true);
         try {
-            // delete community image from storage
-            if (communityStateValue.currentCommunity?.imageURL) {
-                const imageRef = ref(storage, `communities/${communityData.id}/image`);
-                await deleteObject(imageRef);
-            }
+            await runTransaction(firestore, async (transaction) => {
+                // delete community image from storage
+                if (communityStateValue.currentCommunity?.imageURL) {
+                    const imageRef = ref(storage, `communities/${communityData.id}/image`);
+                    await deleteObject(imageRef);
+                }
 
-            // update firestore database (remove imageURL)
-            await updateDoc(doc(firestore, "communities", communityData.id), {
-                imageURL: deleteField()
-            });
+                const communityDocRef = doc(firestore, "communities", communityData.id);
+                const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
 
-            // delete imageURL from communitySnippets
-            await updateDoc(doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id), {
-                imageURL: deleteField()
-            });
+                transaction.update(communityDocRef, { imageURL: deleteField() });
+                transaction.update(userDocRef, { imageURL: deleteField() });
 
-            // update mySnippets in communityStateValue
-            getMySnippets();
+                // update mySnippets in communityStateValue
+                getMySnippets();
 
-            // update recoil atom state
-            setCommunityStateValue((prev) => ({
-                ...prev,
-                currentCommunity: {
-                    ...prev.currentCommunity,
-                    imageURL: undefined,
-                } as Community
-            }));
+                // update recoil atom state
+                setCommunityStateValue((prev) => ({
+                    ...prev,
+                    currentCommunity: {
+                        ...prev.currentCommunity,
+                        imageURL: undefined,
+                    } as Community
+                }));
+            })
         } catch (error: any) {
             console.log("onDeleteImage error", error)
         }
