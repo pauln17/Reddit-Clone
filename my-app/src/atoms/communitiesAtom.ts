@@ -21,11 +21,13 @@ export interface CommunitySnippet {
 interface CommunityState {
     mySnippets: CommunitySnippet[],
     currentCommunity?: Community;
+    snippetsFetched: boolean;
 }
 
 // Sets default values for the CommunityState interface
 const defaultCommunityState: CommunityState = {
-    mySnippets: []
+    mySnippets: [],
+    snippetsFetched: false,
 }
 
 // Creates a recoil atom state that can be accessed globally

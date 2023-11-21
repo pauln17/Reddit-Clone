@@ -1,7 +1,6 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Flex, Icon, Menu, MenuButton, MenuList, Text, Image } from '@chakra-ui/react';
 import React from 'react';
-import { TiHome } from 'react-icons/ti';
 import Communities from './Communities';
 import useDirectory from '@/src/hooks/useDirectory';
 

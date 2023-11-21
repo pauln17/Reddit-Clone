@@ -3,6 +3,7 @@ import About from '@/src/components/Community/About';
 import PageContent from '@/src/components/Layout/PageContent';
 import NewPostForm from '@/src/components/Posts/NewPostForm';
 import { auth, firestore } from '@/src/firebase/clientApp';
+import useCommunityData from '@/src/hooks/useCommunityData';
 import { Box, Text } from '@chakra-ui/react';
 import { doc, getDoc } from 'firebase/firestore';
 import { GetServerSidePropsContext } from 'next';
@@ -11,12 +12,10 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { useRecoilValue } from 'recoil';
 import safeJsonStringify from 'safe-json-stringify';
 
-type SubmitPostPageProps = {
-    communityData: Community;
-};
 
-const SubmitPostPage: React.FC<SubmitPostPageProps> = ({ communityData }) => {
+const SubmitPostPage: React.FC = () => {
     const [user] = useAuthState(auth);
+    const { communityStateValue } = useCommunityData();
 
     return (
         <PageContent>
@@ -24,13 +23,15 @@ const SubmitPostPage: React.FC<SubmitPostPageProps> = ({ communityData }) => {
                 <Box p="14px 0px" borderBottom="1px solid" borderColor="white">
                     <Text>Create a post</Text>
                 </Box>
-                {user && <NewPostForm user={user} />}
+                {user && <NewPostForm user={user} communityImageURL={communityStateValue.currentCommunity?.imageURL} />}
             </>
             <>
-                <About
-                    communityData={communityData}
-                    pt={"62px"}
-                />
+                {communityStateValue.currentCommunity && (
+                    <About
+                        communityData={communityStateValue.currentCommunity}
+                        pt={"62px"}
+                    />
+                )}
             </>
         </PageContent>
     )
