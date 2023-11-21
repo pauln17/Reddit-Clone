@@ -1,16 +1,15 @@
-import { authModalState } from '@/src/atoms/authModalAtom';
 import { ChevronDownIcon } from '@chakra-ui/icons';
-import { Flex, Icon, Menu, MenuButton, MenuList, Text } from '@chakra-ui/react';
+import { Flex, Icon, Menu, MenuButton, MenuList, Text, Image } from '@chakra-ui/react';
 import React from 'react';
-import { useSetRecoilState } from 'recoil';
 import { TiHome } from 'react-icons/ti';
 import Communities from './Communities';
+import useDirectory from '@/src/hooks/useDirectory';
 
-const UserMenu: React.FC = () => {
-    const setAuthModalState = useSetRecoilState(authModalState);
+const Directory: React.FC = () => {
+    const { directoryState, toggleMenuOpen } = useDirectory();
 
     return (
-        <Menu>
+        <Menu isOpen={directoryState.isOpen}>
             <MenuButton
                 cursor="pointer"
                 padding="0px 6px"
@@ -18,6 +17,7 @@ const UserMenu: React.FC = () => {
                 _hover={{ outline: "1px solid", outlineColor: "gray.200" }}
                 mr={2}
                 ml={{ base: 0, md: 2 }}
+                onClick={toggleMenuOpen}
             >
                 <Flex
                     align="center"
@@ -25,10 +25,25 @@ const UserMenu: React.FC = () => {
                     width={{ base: "auto", lg: "200px" }}
                 >
                     <Flex align="center">
-                        <Icon fontSize={24} mr={{ base: 1, md: 2 }} as={TiHome} />
+                        {directoryState.selectedMenuItem.imageURL ? (
+                            <Image
+                                src={directoryState.selectedMenuItem.imageURL}
+                                borderRadius="full"
+                                boxSize="24px"
+                                mr={2}
+                                objectFit="cover"
+                            />
+                        ) : (
+                            <Icon
+                                fontSize={24}
+                                mr={{ base: 1, md: 2 }}
+                                as={directoryState.selectedMenuItem.icon}
+                                color={directoryState.selectedMenuItem.iconColor}
+                            />
+                        )}
                         <Flex display={{ base: "none", lg: "flex" }} align="center">
                             <Text fontWeight={600} fontSize="10pt" mt={1}>
-                                Home
+                                {directoryState.selectedMenuItem.displayText}
                             </Text>
                         </Flex>
                     </Flex>
@@ -36,9 +51,9 @@ const UserMenu: React.FC = () => {
                 </Flex>
             </MenuButton>
             <MenuList>
-                <Communities/>
+                <Communities />
             </MenuList>
         </Menu>
     )
 }
-export default UserMenu;
+export default Directory;

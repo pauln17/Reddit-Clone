@@ -42,9 +42,6 @@ const useCommunityData = () => {
             const snippets = snippetDocs.docs.map((doc) => ({ ...doc.data() }));
             setCommunityStateValue((prev) => ({
                 ...prev,
-                // It is good practice to still spread the previous state of communityStateValue even if there is only one property
-                // In this case, mySnippets which is an array of type CommunitySnippet[]
-                // Basically this is saying it will only update the properties listed below out of the previous properties
                 mySnippets: snippets as CommunitySnippet[],
             }));
         } catch (error: any) {
@@ -62,6 +59,7 @@ const useCommunityData = () => {
             const newSnippet: CommunitySnippet = {
                 communityId: communityData.id,
                 imageURL: communityData.imageURL || "",
+                isModerator: user?.uid === communityData.creatorId,
             }
 
             batch.set(
