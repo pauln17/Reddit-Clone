@@ -36,28 +36,28 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
 
         setImageLoading(true);
         try {
+            const imageRef = ref(storage, `communities/${communityData.id}/image`)
+            await uploadString(imageRef, selectedFile, "data_url");
+            const downloadURL = await getDownloadURL(imageRef);
+            
             await runTransaction(firestore, async (transaction) => {
-                const imageRef = ref(storage, `communities/${communityData.id}/image`)
-                await uploadString(imageRef, selectedFile, "data_url");
-                const downloadURL = await getDownloadURL(imageRef);
-
                 const communityDocRef = doc(firestore, "communities", communityData.id);
                 const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
 
                 transaction.update(communityDocRef, { imageURL: downloadURL });
                 transaction.update(userDocRef, { imageURL: downloadURL });
-
-                // update mySnippets in communityStateValue
-                getMySnippets();
-
-                setCommunityStateValue(prev => ({
-                    ...prev,
-                    currentCommunity: {
-                        ...prev.currentCommunity,
-                        imageURL: downloadURL,
-                    } as Community
-                }));
             })
+
+            // update mySnippets in communityStateValue
+            getMySnippets();
+
+            setCommunityStateValue(prev => ({
+                ...prev,
+                currentCommunity: {
+                    ...prev.currentCommunity,
+                    imageURL: downloadURL,
+                } as Community
+            }));
 
             setSelectedFile(undefined);
             if (selectedFileRef.current) {
@@ -85,19 +85,19 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
 
                 transaction.update(communityDocRef, { imageURL: deleteField() });
                 transaction.update(userDocRef, { imageURL: deleteField() });
-
-                // update mySnippets in communityStateValue
-                getMySnippets();
-
-                // update recoil atom state
-                setCommunityStateValue((prev) => ({
-                    ...prev,
-                    currentCommunity: {
-                        ...prev.currentCommunity,
-                        imageURL: undefined,
-                    } as Community
-                }));
             })
+
+            // update mySnippets in communityStateValue
+            getMySnippets();
+
+            // update recoil atom state
+            setCommunityStateValue((prev) => ({
+                ...prev,
+                currentCommunity: {
+                    ...prev.currentCommunity,
+                    imageURL: undefined,
+                } as Community
+            }));
 
             setSelectedFile(undefined);
             if (selectedFileRef.current) {
