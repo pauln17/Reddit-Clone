@@ -18,7 +18,7 @@ type CommunityPageProps = {
 
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
     const setCommunityStateValue = useSetRecoilState(communityState);
-    
+
     useEffect(() => {
         setCommunityStateValue((prev) => ({
             ...prev,
