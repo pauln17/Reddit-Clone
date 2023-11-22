@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, query, where, writeBatch } from 'firebase/firestore';
+import { collection, collectionGroup, deleteDoc, doc, getDocs, query, runTransaction, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
@@ -140,20 +140,44 @@ const usePosts = () => {
 
     const onDeletePost = async (post: Post): Promise<boolean> => {
         try {
+            let updatedPostVotes = [...postStateValue.postVotes]; // A copy of the postVotes subcollection
             // check if image, delete from storage if exists
             if (post.imageURL) {
                 const imageRef = ref(storage, `posts/${post.id}/image`);
                 await deleteObject(imageRef);
             }
 
-            // delete post document from firestore
-            const postDocRef = doc(firestore, 'posts', post.id!);
-            await deleteDoc(postDocRef);
+            await runTransaction(firestore, async (transaction) => {
+                // delete all user's votes on this post
+                // query the postVotes subcollection where the vote has matching post id
+                const postVotesQuery = query(
+                    collectionGroup(firestore, 'postVotes'),
+                    where('postId', '==', post.id)
+                );
+
+                try {
+                    const postVotesDocs = await getDocs(postVotesQuery);
+                    postVotesDocs.forEach((doc) => {
+                        const docRef = doc.ref;
+                        transaction.delete(docRef)
+                    });
+                } catch (error: any) {
+                    console.error('Error querying postVotes with specific postId:', error.message);
+                }
+
+                // delete post document from firestore
+                const postDocRef = doc(firestore, 'posts', post.id!);
+                transaction.delete(postDocRef);
+            })
 
             // update recoil atom state
+            updatedPostVotes = updatedPostVotes.filter(
+                (vote) => vote.postId === post.id
+            );
             setPostStateValue((prev) => ({
                 ...prev,
-                posts: prev.posts.filter((item) => item.id !== post.id)
+                posts: prev.posts.filter((item) => item.id !== post.id),
+                postVotes: updatedPostVotes
             }));
             return true;
         } catch (error) {
