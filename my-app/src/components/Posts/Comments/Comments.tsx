@@ -32,10 +32,10 @@ const Comments: React.FC<CommentsProps> = ({
             const batch = writeBatch(firestore);
 
             // create a comment document
-            const commentDocRef = doc(collection(firestore, "comments"))
+            const commentRef = doc(collection(firestore, "comments"))
 
             const newComment: Comment = {
-                id: commentDocRef.id,
+                id: commentRef.id,
                 creatorId: user.uid,
                 creatorDisplayText: user.email!.split("@")[0],
                 communityId,
@@ -45,7 +45,7 @@ const Comments: React.FC<CommentsProps> = ({
                 createdAt: serverTimestamp() as Timestamp,
             }
 
-            batch.set(commentDocRef, newComment);
+            batch.set(commentRef, newComment);
 
             // create our own timestamp, this was not needed when creating posts
             // this is because in posts, we created a doc in the database then fetched the posts
@@ -53,8 +53,8 @@ const Comments: React.FC<CommentsProps> = ({
             newComment.createdAt = { seconds: Date.now() / 1000 } as Timestamp
 
             // update post numberOfComments
-            const postDocRef = doc(firestore, "posts", selectedPost?.id!)
-            batch.update(postDocRef, {
+            const postRef = doc(firestore, "posts", selectedPost?.id!)
+            batch.update(postRef, {
                 numberOfComments: increment(1)
             });
 
@@ -82,12 +82,12 @@ const Comments: React.FC<CommentsProps> = ({
             if (!comment.id) throw "Comment has no ID";
             const batch = writeBatch(firestore);
             // delete the comment document
-            const commentDocRef = doc(firestore, "comments", comment.id);
-            batch.delete(commentDocRef);
+            const commentRef = doc(firestore, "comments", comment.id);
+            batch.delete(commentRef);
 
             // update post numberOfComments - 1
-            const postDocRef = doc(firestore, 'posts', selectedPost?.id!);
-            batch.update(postDocRef, {
+            const postRef = doc(firestore, 'posts', selectedPost?.id!);
+            batch.update(postRef, {
                 numberOfComments: increment(-1),
             })
 

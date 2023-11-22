@@ -48,18 +48,18 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open
 
         try {
             // Create community document and communitySnippet subcollection document on user
-            const communityDocRef = doc(firestore, 'communities', communityName);
+            const communityRef = doc(firestore, 'communities', communityName);
 
             // Creates a transaction that manages the creation of a community and the user's subcollection communitySnippet
             await runTransaction(firestore, async (transaction) => {
                 // Check if community exists in database
-                const communityDoc = await transaction.get(communityDocRef)
+                const communityDoc = await transaction.get(communityRef)
                 if (communityDoc.exists()) {
                     throw new Error(`Sorry, r/${communityName} is taken. Try another.`);
                 }
 
                 // Create community
-                transaction.set(communityDocRef, {
+                transaction.set(communityRef, {
                     creatorId: user?.uid,
                     createdAt: serverTimestamp(),
                     numberOfMembers: 1,

@@ -133,8 +133,8 @@ const useCommunityData = () => {
 
     const getCommunityData = async (communityId: string) => {
         try {
-            const communityDocRef = doc(firestore, "communities", communityId);
-            const communityDoc = await getDoc(communityDocRef);
+            const communityRef = doc(firestore, "communities", communityId);
+            const communityDoc = await getDoc(communityRef);
 
             setCommunityStateValue((prev) => ({
                 ...prev,

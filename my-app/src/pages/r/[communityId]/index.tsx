@@ -59,12 +59,12 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     // Get Community Data to Display on Client
     try {
-        const communityDocRef = doc(
+        const communityRef = doc(
             firestore,
             'communities',
             context.query.communityId as string // GetServerSidePropsContext has multiple properties, one of which being .query that allows us to access the query parameters in the dynamic routing URL [communityId]
         );
-        const communityDoc = await getDoc(communityDocRef);
+        const communityDoc = await getDoc(communityRef);
 
         return {
             props: {

@@ -41,9 +41,10 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
             const downloadURL = await getDownloadURL(imageRef);
 
             await runTransaction(firestore, async (transaction) => {
-                const communityDocRef = doc(firestore, "communities", communityData.id);
-                const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
-                
+
+                const communityRef = doc(firestore, "communities", communityData.id);
+                const snippetsRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+
                 // Fetch all posts for the community
                 const postsQuery = query(
                     collection(firestore, "posts"),
@@ -58,8 +59,8 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     transaction.update(postRef, { communityImageURL: downloadURL });
                 });
 
-                transaction.update(communityDocRef, { imageURL: downloadURL });
-                transaction.update(userDocRef, { imageURL: downloadURL });
+                transaction.update(communityRef, { imageURL: downloadURL });
+                transaction.update(snippetsRef, { imageURL: downloadURL });
             })
 
             // update mySnippets in communityStateValue
@@ -105,8 +106,8 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     await deleteObject(imageRef);
                 }
 
-                const communityDocRef = doc(firestore, "communities", communityData.id);
-                const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+                const communityRef = doc(firestore, "communities", communityData.id);
+                const snippetsRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
 
                 // Fetch all posts for the community
                 const postsQuery = query(
@@ -122,10 +123,9 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     transaction.update(postRef, { communityImageURL: deleteField() });
                 });
 
-                transaction.update(communityDocRef, { imageURL: deleteField() });
-                transaction.update(userDocRef, { imageURL: deleteField() });
+                transaction.update(communityRef, { imageURL: deleteField() });
+                transaction.update(snippetsRef, { imageURL: deleteField() });
             })
-
 
             // update mySnippets in communityStateValue
             getMySnippets();
@@ -138,12 +138,12 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     imageURL: undefined,
                 } as Community
             }));
+
             // update posts recoil atom state
             const updatedPosts = postStateValue.posts.map((post) => ({
                 ...post,
                 communityImageURL: undefined
             }))
-            console.log(updatedPosts, "here is updated Posts")
 
             setPostStateValue((prev) => ({
                 ...prev,

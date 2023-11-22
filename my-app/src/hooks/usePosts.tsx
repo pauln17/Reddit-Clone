@@ -142,12 +142,13 @@ const usePosts = () => {
         try {
             let updatedPostVotes = [...postStateValue.postVotes]; // A copy of the postVotes subcollection
             // check if image, delete from storage if exists
-            if (post.imageURL) {
-                const imageRef = ref(storage, `posts/${post.id}/image`);
-                await deleteObject(imageRef);
-            }
 
             await runTransaction(firestore, async (transaction) => {
+                if (post.imageURL) {
+                    const imageRef = ref(storage, `posts/${post.id}/image`);
+                    await deleteObject(imageRef);
+                }
+
                 // delete all user's votes on this post
                 // query the postVotes subcollection where the vote has matching post id
                 const postVotesQuery = query(
@@ -166,8 +167,8 @@ const usePosts = () => {
                 }
 
                 // delete post document from firestore
-                const postDocRef = doc(firestore, 'posts', post.id!);
-                transaction.delete(postDocRef);
+                const postRef = doc(firestore, 'posts', post.id!);
+                transaction.delete(postRef);
             })
 
             // update recoil atom state

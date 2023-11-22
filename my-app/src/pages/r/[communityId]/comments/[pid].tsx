@@ -21,8 +21,8 @@ const PostPage: React.FC = () => {
 
     const fetchPost = async (postId: string) => {
         try {
-            const postDocRef = doc(firestore, "posts", postId);
-            const postDoc = await getDoc(postDocRef);
+            const postRef = doc(firestore, "posts", postId);
+            const postDoc = await getDoc(postRef);
 
             setPostStateValue((prev) => ({
                 ...prev,

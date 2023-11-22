@@ -76,13 +76,13 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user, communityImageURL }) =>
         setLoading(true);
         try {
             // store the post in db
-            const postDocRef = await addDoc(collection(firestore, "posts"), newPost);
+            const postDoc = await addDoc(collection(firestore, "posts"), newPost);
 
             // check for selectedFile
             if (selectedFile) {
                 // creates a posts folder in storage if not exists
                 // else creates a reference to posts/postId/image in the bucket
-                const imageRef = ref(storage, `posts/${postDocRef.id}/image`)
+                const imageRef = ref(storage, `posts/${postDoc.id}/image`)
 
                 // store in storage (a reference to the location you want to store, the file, the type)
                 await uploadString(imageRef, selectedFile, `data_url`);
@@ -91,7 +91,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user, communityImageURL }) =>
                 const downloadURL = await getDownloadURL(imageRef);
 
                 // update post doc by adding imageURL
-                await updateDoc(postDocRef, {
+                await updateDoc(postDoc, {
                     imageURL: downloadURL,
                 })
             }
