@@ -17,11 +17,16 @@ Password: 123456
 - Chakra
 
 ### Key Features
-Firebase v9 Authentication
-Customized Feeds
-Create Communities
-Create Posts
-Create Comments
-Top Communities
-Dropdown Navigation
-Voting Functionality
+- Firebase v9 Authentication
+- Customized Feeds
+- Create Communities
+- Create Posts
+- Create Comments
+- Top Communities
+- Dropdown Navigation
+- Voting Functionality
+
+### Notes
+To clone this repository and run it on your local system, you will need to create your own Firebase project and add the required information alongside enabling Firestore, Storage and adding the required indexes.
+
+For more information on creating your own Firebase project, visit: https://firebase.google.com/docs/auth/web/start#web-modular-api
