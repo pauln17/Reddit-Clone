@@ -17,10 +17,17 @@ export interface CommunitySnippet {
     imageURL?: string;
 }
 
+export const defaultCommunity: Community = {
+    id: "",
+    creatorId: "",
+    numberOfMembers: 0,
+    privacyType: "public",
+};
+
 // Creates an interface called CommunityState that stores the user's communitySnippets subcollection and the currentCommunity they are accessing on a page.
 interface CommunityState {
     mySnippets: CommunitySnippet[],
-    currentCommunity?: Community;
+    currentCommunity: Community;
     snippetsFetched: boolean;
 }
 
@@ -28,6 +35,7 @@ interface CommunityState {
 const defaultCommunityState: CommunityState = {
     mySnippets: [],
     snippetsFetched: false,
+    currentCommunity: defaultCommunity,
 }
 
 // Creates a recoil atom state that can be accessed globally

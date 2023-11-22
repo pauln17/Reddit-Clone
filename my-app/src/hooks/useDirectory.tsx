@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import { DirectoryMenuItem, directoryMenuState } from '../atoms/directoryMenuAtom';
+import { DirectoryMenuItem, defaultMenuItem, directoryMenuState } from '../atoms/directoryMenuAtom';
 import { useRouter } from 'next/router';
 import { communityState } from '../atoms/communitiesAtom';
 import { FaReddit } from 'react-icons/fa';
@@ -34,8 +34,7 @@ const useDirectory = () => {
 
     useEffect(() => {
         const { currentCommunity } = communityStateValue;
-
-        if (currentCommunity) {
+        if (currentCommunity.id) {
             setDirectoryState((prev) => ({
                 ...prev,
                 selectedMenuItem: {
@@ -43,10 +42,15 @@ const useDirectory = () => {
                     link: `/r/${currentCommunity.id}`,
                     imageURL: currentCommunity.imageURL,
                     icon: FaReddit,
-                    iconColor: "brand.100"
+                    iconColor: "blue.500"
                 }
             }));
+            return;
         }
+        setDirectoryState((prev) => ({
+            ...prev,
+            selectedMenuItem: defaultMenuItem,
+        }));
     }, [communityStateValue.currentCommunity])
 
     return {

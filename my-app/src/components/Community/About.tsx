@@ -1,19 +1,18 @@
-import { Community, communityState } from '@/src/atoms/communitiesAtom';
+import { Community } from '@/src/atoms/communitiesAtom';
 import { auth, firestore, storage } from '@/src/firebase/clientApp';
 import useCommunityData from '@/src/hooks/useCommunityData';
+import usePosts from '@/src/hooks/usePosts';
 import useSelectFile from '@/src/hooks/useSelectFile';
 import { Box, Button, Divider, Flex, Icon, Image, Spinner, Stack, Text } from '@chakra-ui/react';
-import { deleteField, doc, runTransaction, updateDoc } from 'firebase/firestore';
+import { collection, deleteField, doc, getDocs, query, runTransaction, where } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadString } from 'firebase/storage';
 import moment from "moment";
 import Link from "next/link";
-import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { FaReddit } from 'react-icons/fa';
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { RiCakeLine } from "react-icons/ri";
-import { useRecoilState } from 'recoil';
 
 type AboutProps = {
     communityData: Community;
@@ -26,6 +25,7 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
     const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
     const [imageLoading, setImageLoading] = useState(false);
     const { communityStateValue, setCommunityStateValue, getMySnippets, getCommunityData } = useCommunityData();
+    const { postStateValue, setPostStateValue } = usePosts()
 
     const onUpdateImage = async () => {
         if (!selectedFile) return;
@@ -39,10 +39,24 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
             const imageRef = ref(storage, `communities/${communityData.id}/image`)
             await uploadString(imageRef, selectedFile, "data_url");
             const downloadURL = await getDownloadURL(imageRef);
-            
+
             await runTransaction(firestore, async (transaction) => {
                 const communityDocRef = doc(firestore, "communities", communityData.id);
                 const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+                
+                // Fetch all posts for the community
+                const postsQuery = query(
+                    collection(firestore, "posts"),
+                    where("communityId", "==", communityData.id)
+                );
+
+                const postsDoc = await getDocs(postsQuery);
+
+                // Update each post's communityImageURL
+                postsDoc.forEach((postDoc) => {
+                    const postRef = doc(firestore, "posts", postDoc.id);
+                    transaction.update(postRef, { communityImageURL: downloadURL });
+                });
 
                 transaction.update(communityDocRef, { imageURL: downloadURL });
                 transaction.update(userDocRef, { imageURL: downloadURL });
@@ -57,6 +71,17 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     ...prev.currentCommunity,
                     imageURL: downloadURL,
                 } as Community
+            }));
+            // update posts recoil atom state
+            const updatedPosts = postStateValue.posts.map((post) => ({
+                ...post,
+                communityImageURL: downloadURL
+            }))
+            console.log(updatedPosts, "here is updated Posts")
+
+            setPostStateValue((prev) => ({
+                ...prev,
+                posts: updatedPosts
             }));
 
             setSelectedFile(undefined);
@@ -83,20 +108,46 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 const communityDocRef = doc(firestore, "communities", communityData.id);
                 const userDocRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
 
+                // Fetch all posts for the community
+                const postsQuery = query(
+                    collection(firestore, "posts"),
+                    where("communityId", "==", communityData.id)
+                );
+
+                const postsDoc = await getDocs(postsQuery);
+
+                // Update each post's communityImageURL
+                postsDoc.forEach((postDoc) => {
+                    const postRef = doc(firestore, "posts", postDoc.id);
+                    transaction.update(postRef, { communityImageURL: deleteField() });
+                });
+
                 transaction.update(communityDocRef, { imageURL: deleteField() });
                 transaction.update(userDocRef, { imageURL: deleteField() });
             })
 
+
             // update mySnippets in communityStateValue
             getMySnippets();
 
-            // update recoil atom state
+            // update community recoil atom state
             setCommunityStateValue((prev) => ({
                 ...prev,
                 currentCommunity: {
                     ...prev.currentCommunity,
                     imageURL: undefined,
                 } as Community
+            }));
+            // update posts recoil atom state
+            const updatedPosts = postStateValue.posts.map((post) => ({
+                ...post,
+                communityImageURL: undefined
+            }))
+            console.log(updatedPosts, "here is updated Posts")
+
+            setPostStateValue((prev) => ({
+                ...prev,
+                posts: updatedPosts
             }));
 
             setSelectedFile(undefined);
