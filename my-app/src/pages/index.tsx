@@ -13,6 +13,9 @@ import PostLoader from '../components/Posts/PostLoader';
 import { Stack } from '@chakra-ui/react';
 import PostItem from '../components/Posts/PostItem';
 import CreatePostLink from '../components/Community/CreatePostLink';
+import Recommendations from '../components/Community/Recommendations';
+import PersonalHome from '../components/Community/PersonalHome';
+import Premium from '../components/Community/Premium';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -160,7 +163,11 @@ export default function Home() {
         )}
       </>
       <>
-        {/* Recommendations */}
+        <Stack spacing={5} position="sticky" top="14px">
+          <Recommendations />
+          <Premium />
+          <PersonalHome />
+        </Stack>
       </>
     </PageContent>
   )
