@@ -10,7 +10,6 @@ import PageContent from '@/src/components/Layout/PageContent';
 import CreatePostLink from "@/src/components/Community/CreatePostLink";
 import Posts from '@/src/components/Posts/Posts';
 import { useSetRecoilState } from 'recoil';
-import { Preahvihear } from 'next/font/google';
 import About from '@/src/components/Community/About';
 
 type CommunityPageProps = {
@@ -18,20 +17,20 @@ type CommunityPageProps = {
 };
 
 const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
-    if (!communityData) {
-        return (
-            <NotFound />
-        )
-    }
-
     const setCommunityStateValue = useSetRecoilState(communityState);
-
+    
     useEffect(() => {
         setCommunityStateValue((prev) => ({
             ...prev,
             currentCommunity: communityData,
         }))
     }, [communityData])
+
+    if (!communityData) {
+        return (
+            <NotFound />
+        )
+    }
 
     return (
         <>
