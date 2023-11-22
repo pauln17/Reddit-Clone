@@ -4,7 +4,7 @@ import useCommunityData from '@/src/hooks/useCommunityData';
 import usePosts from '@/src/hooks/usePosts';
 import useSelectFile from '@/src/hooks/useSelectFile';
 import { Box, Button, Divider, Flex, Icon, Image, Spinner, Stack, Text } from '@chakra-ui/react';
-import { collection, deleteField, doc, getDocs, query, runTransaction, where } from 'firebase/firestore';
+import { collection, collectionGroup, deleteField, doc, getDocs, query, runTransaction, where } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadString } from 'firebase/storage';
 import moment from "moment";
 import Link from "next/link";
@@ -37,20 +37,32 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
         setImageLoading(true);
         try {
             const imageRef = ref(storage, `communities/${communityData.id}/image`)
-            await uploadString(imageRef, selectedFile, "data_url");
-            const downloadURL = await getDownloadURL(imageRef);
 
             await runTransaction(firestore, async (transaction) => {
+                await uploadString(imageRef, selectedFile, "data_url");
+                const downloadURL = await getDownloadURL(imageRef);
 
                 const communityRef = doc(firestore, "communities", communityData.id);
-                const snippetsRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+
+                // Update every user's communitySnippets imageURL field
+                const communitySnippetsQuery = query(
+                    collectionGroup(firestore, 'communitySnippets'),
+                    where('communityId', '==', communityStateValue.currentCommunity.id)
+                );
+                try {
+                    const communitySnippetsDocs = await getDocs(communitySnippetsQuery);
+                    communitySnippetsDocs.forEach((snippetsDoc) => {
+                        transaction.update(snippetsDoc.ref, { imageURL: downloadURL });
+                    });
+                } catch (error: any) {
+                    console.error('Error querying communitySnippets with specific communityId:', error.message);
+                }
 
                 // Fetch all posts for the community
                 const postsQuery = query(
                     collection(firestore, "posts"),
                     where("communityId", "==", communityData.id)
                 );
-
                 const postsDoc = await getDocs(postsQuery);
 
                 // Update each post's communityImageURL
@@ -60,12 +72,13 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 });
 
                 transaction.update(communityRef, { imageURL: downloadURL });
-                transaction.update(snippetsRef, { imageURL: downloadURL });
             })
 
             // update mySnippets in communityStateValue
             getMySnippets();
 
+            // update community recoil atom state
+            const downloadURL = await getDownloadURL(imageRef);
             setCommunityStateValue(prev => ({
                 ...prev,
                 currentCommunity: {
@@ -73,18 +86,19 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                     imageURL: downloadURL,
                 } as Community
             }));
+
             // update posts recoil atom state
             const updatedPosts = postStateValue.posts.map((post) => ({
                 ...post,
                 communityImageURL: downloadURL
             }))
-            console.log(updatedPosts, "here is updated Posts")
 
             setPostStateValue((prev) => ({
                 ...prev,
                 posts: updatedPosts
             }));
 
+            // reset selected files after changes have been saved
             setSelectedFile(undefined);
             if (selectedFileRef.current) {
                 selectedFileRef.current.value = '';
@@ -100,14 +114,29 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
         setImageLoading(true);
         try {
             await runTransaction(firestore, async (transaction) => {
+                // initialize references to the community
+                const communityRef = doc(firestore, "communities", communityData.id);
+
                 // delete community image from storage
                 if (communityStateValue.currentCommunity?.imageURL) {
                     const imageRef = ref(storage, `communities/${communityData.id}/image`);
                     await deleteObject(imageRef);
                 }
 
-                const communityRef = doc(firestore, "communities", communityData.id);
-                const snippetsRef = doc(firestore, `users/${user?.uid}/communitySnippets`, communityData.id);
+                // Update every user's communitySnippets imageURL field
+                const communitySnippetsQuery = query(
+                    collectionGroup(firestore, 'communitySnippets'),
+                    where('communityId', '==', communityStateValue.currentCommunity.id)
+                );
+
+                try {
+                    const communitySnippetsDocs = await getDocs(communitySnippetsQuery);
+                    communitySnippetsDocs.forEach((snippetsDoc) => {
+                        transaction.update(snippetsDoc.ref, { imageURL: deleteField() });
+                    });
+                } catch (error: any) {
+                    console.error('Error querying communitySnippets with specific communityId:', error.message);
+                }
 
                 // Fetch all posts for the community
                 const postsQuery = query(
@@ -124,7 +153,6 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 });
 
                 transaction.update(communityRef, { imageURL: deleteField() });
-                transaction.update(snippetsRef, { imageURL: deleteField() });
             })
 
             // update mySnippets in communityStateValue
@@ -150,6 +178,7 @@ const About: React.FC<AboutProps> = ({ communityData, pt }) => {
                 posts: updatedPosts
             }));
 
+            // reset selected files after changes have been saved
             setSelectedFile(undefined);
             if (selectedFileRef.current) {
                 selectedFileRef.current.value = '';

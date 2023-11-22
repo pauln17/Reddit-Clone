@@ -14,7 +14,6 @@ type CommunitiesProps = {
 const Communities: React.FC<CommunitiesProps> = () => {
     const [open, setOpen] = useState(false);
     const mySnippets = useRecoilValue(communityState).mySnippets;
-
     return (
         <>
             <CreateCommunityModal open={open} handleClose={() => setOpen(false)} />
