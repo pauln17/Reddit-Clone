@@ -77,7 +77,7 @@ export const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({ open
             });
             handleClose();
             toggleMenuOpen();
-            router.push(`r/${communityName}`)
+            router.push(`/r/${communityName}`)
         } catch (error: any) {
             console.log("handleCreateCommunity error", error);
             setError(error.message);

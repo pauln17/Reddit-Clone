@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { CreateCommunityModal } from '../../Modal/CreateCommunity/CreateCommunityModal';
-import { MenuItem, Flex, Icon, Box, Text } from '@chakra-ui/react';
-import { GrAdd } from 'react-icons/gr';
-import { communityState } from '@/src/atoms/communitiesAtom';
-import { useRecoilValue } from 'recoil';
-import MenuListItem from './MenuListItem';
+import { Box, Flex, Icon, MenuItem, Text } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import { FaReddit } from 'react-icons/fa';
+import { GrAdd } from 'react-icons/gr';
+import { CreateCommunityModal } from '../../Modal/CreateCommunity/CreateCommunityModal';
+import MenuListItem from './MenuListItem';
+import useCommunityData from '@/src/hooks/useCommunityData';
 
 type CommunitiesProps = {
 
@@ -13,7 +12,9 @@ type CommunitiesProps = {
 
 const Communities: React.FC<CommunitiesProps> = () => {
     const [open, setOpen] = useState(false);
-    const mySnippets = useRecoilValue(communityState).mySnippets;
+    const { communityStateValue } = useCommunityData();
+    const mySnippets = communityStateValue.mySnippets;
+
     return (
         <>
             <CreateCommunityModal open={open} handleClose={() => setOpen(false)} />

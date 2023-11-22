@@ -157,14 +157,6 @@ const useCommunityData = () => {
         getMySnippets();
     }, [user])
 
-    // useEffect(() => {
-    //     const { communityId } = router.query;
-
-    //     if (communityId && !communityStateValue.currentCommunity) {
-    //         getCommunityData(communityId as string)
-    //     }
-    // }, [router.query, communityStateValue.currentCommunity])
-
     useEffect(() => {
         const { communityId } = router.query;
         if (communityId) {
