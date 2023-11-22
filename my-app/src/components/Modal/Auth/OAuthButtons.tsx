@@ -16,7 +16,7 @@ const OAuthButton: React.FC = () => {
                     isLoading={loadingGoogle}
                     onClick={() => signInWithGoogle()}
                 >
-                    <Image src="/images/googlelogo.png" height="20px" mr={4} />
+                    <Image alt="Google" src="/images/googlelogo.png" height="20px" mr={4} />
                     Continue with Google
                 </Button>
                 <Button
@@ -25,7 +25,7 @@ const OAuthButton: React.FC = () => {
                     isLoading={loadingGithub}
                     onClick={() => signInWithGithub()}
                 >
-                    <Image src="/images/Githublogo.png" height="20px" mr={2} />
+                    <Image alt="Github" src="/images/githublogo.png" height="20px" mr={2} />
                     Continue with Github
                 </Button>
                 {(errorGoogle || errorGithub) && <Text>

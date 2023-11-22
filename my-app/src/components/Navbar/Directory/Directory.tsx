@@ -31,6 +31,7 @@ const Directory: React.FC = () => {
                                 boxSize="24px"
                                 mr={2}
                                 objectFit="cover"
+                                alt="Community Image"
                             />
                         ) : (
                             <Icon

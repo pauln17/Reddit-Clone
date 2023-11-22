@@ -123,11 +123,12 @@ const PostItem: React.FC<PostItemProps> = ({
                                         borderRadius="full"
                                         boxSize="18px"
                                         mb="3px"
+                                        alt="Community Image"
                                     />
                                 ) : (
                                     <Icon as={FaReddit} fontSize="18pt" mr={1} color="blue.500" />
                                 )}
-                                <Link href={`r/${post.communityId}`}>
+                                <Link href={`/r/${post.communityId}`}>
                                     <Text
                                         fontWeight={700}
                                         _hover={{ textDecoration: "underline" }}

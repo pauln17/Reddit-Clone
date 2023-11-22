@@ -118,6 +118,7 @@ const Recommendations: React.FC<RecommendationsProps> = () => {
                                                         boxSize="28px"
                                                         src={item.imageURL}
                                                         mr={2}
+                                                        alt="Community Image"
                                                     />
                                                 ) : (
                                                     <Icon
