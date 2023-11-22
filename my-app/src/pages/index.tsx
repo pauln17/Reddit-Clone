@@ -8,7 +8,7 @@ import { auth, firestore } from '../firebase/clientApp';
 import { log } from 'console';
 import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import usePosts from '../hooks/usePosts';
-import { Post } from '../atoms/postsAtom';
+import { Post, PostVote } from '../atoms/postsAtom';
 import PostLoader from '../components/Posts/PostLoader';
 import { Stack } from '@chakra-ui/react';
 import PostItem from '../components/Posts/PostItem';
@@ -91,20 +91,48 @@ export default function Home() {
     setLoading(false);
   };
 
-  const getUserPostVotes = () => {
+  const getUserPostVotes = async () => {
+    try {
+      const postIds = postStateValue.posts.map((post) => post.id);
+      const postVotesQuery = query(
+        collection(firestore, `users/${user?.uid}/postVotes`),
+        where("postId", "in", postIds),
+      )
+      const postVoteDocs = await getDocs(postVotesQuery);
+      const postVotes = postVoteDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setPostStateValue((prev) => ({
+        ...prev,
+        postVotes: postVotes as PostVote[]
+      }));
+    } catch (error) {
+      console.log("getUserPostVotes error");
 
+    }
   };
 
   // The reason for loadingUser is that user initially returns as undefined, so we check if the system has attempted to fetch it or not
   useEffect(() => {
     if (!user && !loadingUser) buildNoUserHomeFeed()
-
   }, [user, loadingUser])
 
   useEffect(() => {
     if (communityStateValue.snippetsFetched) buildUserHomeFeed()
-
   }, [communityStateValue.snippetsFetched])
+
+  useEffect(() => {
+    if (user && postStateValue.posts.length) getUserPostVotes();
+
+    // A clean up function, specifically to prevent duplicate postVotes data overlapping when navigating into a community from home etc.
+    return () => {
+      setPostStateValue(prev => ({
+        ...prev,
+        postVotes: [],
+      }));
+    }
+  }, [user, postStateValue.posts])
 
   return (
     <PageContent>
